@@ -64,12 +64,27 @@ const TeacherProfileScreen = ({ route }) => {
   const [modalType, setModalType] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [activatingAccount, setActivatingAccount] = useState(false); // Added for activation loading
+  const [activatingAccount, setActivatingAccount] = useState(false);
   const [subjectOptions, setSubjectOptions] = useState([]);
   const dispatch = useDispatch();
   const navigation = useNavigation();
   // Options for dropdowns
   const genderOptions = ["ذكر", "أنثى"];
+  const [subscriptionPrice, setSubscriptionPrice] = useState(79);
+  const fetchPrice = async () => {
+    try {
+      const PriceContainer = await GETDOC("Settings", "Price");
+      setSubscriptionPrice(PriceContainer.Price);
+    } catch (error) {
+      console.error("Error fetching payment methods:", error);
+      Alert.alert("خطأ", "فشل في جلب طرق الدفع");
+    }
+  };
+  useFocusEffect(
+    useCallback(() => {
+      fetchPrice();
+    }, [fetchPrice])
+  );
 
   const educationLevelOptions = ["ابتدائي", "إعدادي", "ثانوي"];
   const handleSubjectsChange = (array) => {
@@ -235,7 +250,7 @@ const TeacherProfileScreen = ({ route }) => {
           }
         },
         paymentReason: "subscription",
-        requiredAmount: 79,
+        requiredAmount: subscriptionPrice,
       });
     } catch (error) {
       console.error("Error activating account:", error);
@@ -605,7 +620,8 @@ const TeacherProfileScreen = ({ route }) => {
                     المزيد من الطلاب، يرجى تفعيل حسابك.
                   </Text>
                   <Text style={styles.warningText}>
-                    يمكنك الان تفعيل الحساب باشتراك 79 جنية شهريا{" "}
+                    يمكنك الان تفعيل الحساب باشتراك {subscriptionPrice} جنية
+                    شهريا
                   </Text>
 
                   <TouchableOpacity

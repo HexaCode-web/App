@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, Text, Alert } from "react-native";
 import { theme } from "../../components/Theme";
-import { QUERY, UPDATEDOC } from "../../server";
+import { GETDOC, QUERY, UPDATEDOC } from "../../server";
 import { useFocusEffect } from "@react-navigation/native";
 import Promotion from "./Promotion";
 
 const HeroSection = () => {
   const [boostedProfiles, setBoostedProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [numbers, setNumber] = useState(null);
   const fetchBoostedProfiles = async () => {
     try {
       setLoading(true);
@@ -48,9 +48,13 @@ const HeroSection = () => {
       setLoading(false);
     }
   };
-
+  const fetchNumbers = async () => {
+    const numbers = await GETDOC("Settings", "Counts");
+    setNumber(numbers);
+  };
   useFocusEffect(
     useCallback(() => {
+      fetchNumbers();
       fetchBoostedProfiles();
     }, [])
   );
@@ -86,7 +90,7 @@ const HeroSection = () => {
             <View style={styles.statsContainer}>
               <View style={styles.statCard}>
                 <View style={styles.statInfo}>
-                  <Text style={styles.statNumber}>2000</Text>
+                  <Text style={styles.statNumber}>{numbers?.Student}</Text>
                   <Text style={styles.statLabel}>طالب</Text>
                 </View>
                 <View style={styles.statIcon}>
@@ -96,7 +100,7 @@ const HeroSection = () => {
 
               <View style={styles.statCard}>
                 <View style={styles.statInfo}>
-                  <Text style={styles.statNumber}>100</Text>
+                  <Text style={styles.statNumber}>{numbers?.Teacher}</Text>
                   <Text style={styles.statLabel}>مدرس</Text>
                 </View>
                 <View style={styles.statIcon}>

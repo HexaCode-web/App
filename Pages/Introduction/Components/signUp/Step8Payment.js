@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import styles from "./SignUpStyles";
 import { theme, componentStyles } from "../../../../components/Theme";
 import { GETDOC, SETDOC } from "../../../../server";
 import { v4 as uuidv4 } from "uuid";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Step8Payment = ({ formData, updateFormData, errors, handleSubmit }) => {
   const User = formData;
@@ -29,10 +30,23 @@ const Step8Payment = ({ formData, updateFormData, errors, handleSubmit }) => {
   const [showDetails, setShowDetails] = useState({});
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [subscriptionPrice, setSubscriptionPrice] = useState(79);
+  const fetchPrice = async () => {
+    try {
+      const PriceContainer = await GETDOC("Settings", "Price");
+      console.log(PriceContainer);
 
-  // Subscription details
-  const subscriptionPrice = 79; // جنيه شهرياً
-
+      setSubscriptionPrice(PriceContainer.Price);
+    } catch (error) {
+      console.error("Error fetching payment methods:", error);
+      Alert.alert("خطأ", "فشل في جلب طرق الدفع");
+    }
+  };
+  useFocusEffect(
+    useCallback(() => {
+      fetchPrice();
+    }, [fetchPrice])
+  );
   useEffect(() => {
     if (showPaymentForm) {
       fetchPaymentMethods();

@@ -51,7 +51,7 @@ const Signup = ({ setActivePage }) => {
 
     // Payments
     isActive: false,
-    pendingApproval: true,
+    pendingApproval: false,
     boosted: false,
 
     // Personal Info
