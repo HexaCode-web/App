@@ -103,7 +103,7 @@ const Signup = ({ setActivePage }) => {
       }
     },
     name: (name) => {
-      return name.trim().length >= 2 && /^[a-zA-Zأ-ي\s]+$/.test(name);
+      return name.trim().length >= 2;
     },
     price: (price) => {
       return /^\d+(\.\d{1,2})?$/.test(price) && parseFloat(price) > 0;
