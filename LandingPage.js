@@ -1,9 +1,10 @@
-// HomeScreen.js - Updated with new tab bar style
+// HomeScreen.js - Updated with WhatsApp link in tab bar
 import { useEffect, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { NavigationContainer } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Linking } from "react-native"; // Add this import
 
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -65,6 +66,7 @@ const Home = () => {
 
     checkSession();
   }, []);
+
   useEffect(() => {
     const hideSplashScreen = async () => {
       if (!loading && fontsLoaded) {
@@ -74,6 +76,11 @@ const Home = () => {
 
     hideSplashScreen();
   }, [loading]);
+
+  // Function to handle WhatsApp link
+  const openWhatsApp = () => {
+    Linking.openURL(`https://wa.me/+201017150105`);
+  };
 
   if (loading) {
     return null;
@@ -149,6 +156,12 @@ const Home = () => {
                   color={focused ? theme.colors.primary : "#666666"}
                 />
               ),
+            }}
+            listeners={{
+              tabPress: (e) => {
+                e.preventDefault();
+                openWhatsApp();
+              },
             }}
           />
           <Tab.Screen

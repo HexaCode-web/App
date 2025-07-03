@@ -72,8 +72,6 @@ const EducationLevelScreen = ({ route, navigation }) => {
 
   // Define subjects for each education level
   const getSubjectsForLevel = (levelTitle) => {
-    console.log(levelTitle);
-
     switch (levelTitle) {
       case "المرحلة الابتدائية":
         return [
@@ -81,7 +79,7 @@ const EducationLevelScreen = ({ route, navigation }) => {
           { id: 2, title: "انجليزى", icon: "🇬🇧" },
           { id: 3, title: "حساب", icon: "🔢" },
           { id: 4, title: "علوم", icon: "🔬" },
-          { id: 5, title: "دراسات اجتماعية", icon: "🌍" },
+          { id: 5, title: "دراسات اجتماعيه", icon: "🌍" },
           { id: 6, title: "دين", icon: "☪️" },
           { id: 7, title: "تكنولوجيا", icon: "💻" },
           { id: 8, title: "فرنساوى", icon: "🇫🇷" },

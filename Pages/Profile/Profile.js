@@ -16,7 +16,14 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
-import { SETDOC, GETDOC, UPLOADPHOTO, DELETEDOC } from "../../server";
+import {
+  SETDOC,
+  GETDOC,
+  UPLOADPHOTO,
+  DELETEDOC,
+  hashPassword,
+  UPDATEDOC,
+} from "../../server";
 import { theme, componentStyles } from "../../components/Theme";
 import TopBar from "../../components/TopBar";
 import { useDispatch, useSelector } from "react-redux";
@@ -66,6 +73,9 @@ const TeacherProfileScreen = ({ route }) => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [activatingAccount, setActivatingAccount] = useState(false);
   const [subjectOptions, setSubjectOptions] = useState([]);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [enteredPassword, setEnteredPassword] = useState("");
   const dispatch = useDispatch();
   const navigation = useNavigation();
   // Options for dropdowns
@@ -156,7 +166,7 @@ const TeacherProfileScreen = ({ route }) => {
     "انجليزى",
     "حساب",
     "علوم",
-    "دراسات اجتماعية",
+    "دراسات اجتماعيه",
     "دين",
     "تكنولوجيا",
     "فرنساوى",
@@ -230,7 +240,25 @@ const TeacherProfileScreen = ({ route }) => {
       ]
     );
   };
-
+  const handlePasswordChange = async () => {
+    if (!showPasswordChange) {
+      setShowPasswordChange(true);
+      return;
+    }
+    if (hashPassword(enteredPassword) === User.password) {
+      try {
+        await UPDATEDOC("teachers", teacherId, {
+          password: hashPassword(newPassword),
+        });
+        Alert.alert("نجاح", "تم تغيير كلمة المرور");
+      } catch (error) {
+        Alert.alert("خطا", "حدث خطا ما");
+      }
+      setShowPasswordChange(false);
+    } else {
+      Alert.alert("خطا", "كلمة المرور القديمة غير صحيحة");
+    }
+  };
   const confirmActivateAccount = async () => {
     setActivatingAccount(true);
     try {
@@ -749,6 +777,7 @@ const TeacherProfileScreen = ({ route }) => {
               <Text style={componentStyles.card.title}>ادارة الحساب</Text>
 
               {renderField("رقم الهاتف", teacherData.phone, "phone")}
+
               <TouchableOpacity
                 style={[componentStyles.button.primary, styles.Danger]}
                 onPress={handleDeleteAccount}
@@ -760,9 +789,57 @@ const TeacherProfileScreen = ({ route }) => {
               </TouchableOpacity>
             </View>
           )}
+          {authToChange && isEditing && (
+            <View style={componentStyles.card.container}>
+              <Text style={componentStyles.card.title}>ادارة كلمة المرور</Text>
+              {showPasswordChange && (
+                <View>
+                  <View style={styles.fieldContainer}>
+                    <Text style={styles.label}>كلمة المرور القديمة</Text>
+                    <TextInput
+                      style={[styles.input]}
+                      value={enteredPassword || ""}
+                      onChangeText={(text) => setEnteredPassword(text)}
+                      textAlign="right"
+                    />
+                  </View>
+                  <View style={styles.fieldContainer}>
+                    <Text style={styles.label}>كلمة المرور الجديدة</Text>
+                    <TextInput
+                      style={[styles.input]}
+                      value={newPassword || ""}
+                      onChangeText={(text) => setNewPassword(text)}
+                      textAlign="right"
+                    />
+                  </View>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={[componentStyles.button.primary, styles.saveButton]}
+                onPress={handlePasswordChange}
+                disabled={loading}
+              >
+                <Text style={componentStyles.button.text.primary}>
+                  {showPasswordChange ? "حفط" : "تغيير كلمة المرور"}
+                </Text>
+              </TouchableOpacity>
+              {showPasswordChange && (
+                <TouchableOpacity
+                  style={[componentStyles.button.primary, styles.Danger]}
+                  onPress={() => {
+                    setShowPasswordChange(false);
+                  }}
+                  disabled={loading}
+                >
+                  <Text style={styles.confirmButtonText}>الغاء</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
 
           {/* Save Button */}
-          {isEditing && (
+          {isEditing && !showPasswordChange && (
             <TouchableOpacity
               style={[componentStyles.button.primary, styles.saveButton]}
               onPress={handleSave}
@@ -773,7 +850,7 @@ const TeacherProfileScreen = ({ route }) => {
               </Text>
             </TouchableOpacity>
           )}
-          {authToChange && (
+          {authToChange && !showPasswordChange && (
             <TouchableOpacity
               onPress={isEditing ? handleCancel : () => setIsEditing(true)}
               style={[

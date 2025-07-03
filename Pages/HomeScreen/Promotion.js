@@ -345,8 +345,10 @@ const styles = StyleSheet.create({
     minHeight: 280,
   },
   teacherHeader: {
-    flexDirection: "row-reverse", // RTL layout
-    alignItems: "flex-start",
+    flexDirection: "column", // RTL layout
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 20,
     marginBottom: theme.spacing.md || 16,
   },
   teacherImageContainer: {
@@ -385,15 +387,17 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamily?.bold || "System",
     color: theme.colors.text?.primary || "#1A1A1A",
     marginBottom: theme.spacing.xs || 4,
-    textAlign: "right",
+    textAlign: "center",
     writingDirection: "rtl",
     lineHeight: 24,
+    margin: "auto",
+    numberOfLines: 0,
   },
   teacherBio: {
     fontSize: theme.typography.fontSize?.sm || 14,
     fontFamily: theme.typography.fontFamily?.regular || "System",
     color: theme.colors.text?.secondary || "#666666",
-    textAlign: "right",
+    textAlign: "center",
     writingDirection: "rtl",
     lineHeight: 20,
   },

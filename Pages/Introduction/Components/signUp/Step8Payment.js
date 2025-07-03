@@ -34,7 +34,6 @@ const Step8Payment = ({ formData, updateFormData, errors, handleSubmit }) => {
   const fetchPrice = async () => {
     try {
       const PriceContainer = await GETDOC("Settings", "Price");
-      console.log(PriceContainer);
 
       setSubscriptionPrice(PriceContainer.Price);
     } catch (error) {

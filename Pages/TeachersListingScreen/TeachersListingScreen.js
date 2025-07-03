@@ -25,6 +25,15 @@ const TeachersListingScreen = ({ route, navigation }) => {
   const [error, setError] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
 
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   // Map education levels to match database format
   const mapEducationLevel = (levelTitle) => {
     switch (levelTitle) {
@@ -47,7 +56,6 @@ const TeachersListingScreen = ({ route, navigation }) => {
       const mappedEducationLevel = mapEducationLevel(educationLevel.title);
 
       const allTeachers = await QUERY("teachers", "isActive", "==", true);
-      console.log("All active teachers:", allTeachers);
 
       const updatePromises = allTeachers
         .filter((teacher) => {
@@ -56,35 +64,44 @@ const TeachersListingScreen = ({ route, navigation }) => {
           return activeTillDate <= currentDate;
         })
         .map(async (teacher) => {
-          console.log(`Updating teacher ${teacher.name} to inactive`);
           return await UPDATEDOC("teachers", teacher.id, { isActive: false });
         });
 
       await Promise.all(updatePromises);
 
       const filteredTeachers = allTeachers.filter((teacher) => {
-        // 1. Filter out expired teachers
         if (teacher.ActiveTill && teacher.ActiveTill.seconds) {
           const activeTillDate = new Date(teacher.ActiveTill.seconds * 1000);
           if (activeTillDate <= currentDate) {
-            console.log(`Excluding expired teacher: ${teacher.name}`);
             return false;
           }
         }
 
-        // 2. Filter by education level and subject
-        if (subject !== "تحفيظ القرآن") {
+        const subjectTitle =
+          typeof subject === "object" ? subject.title : subject;
+
+        if (
+          subjectTitle === "تحفيظ القرآن" ||
+          subjectTitle?.trim() === "تحفيظ القرآن" ||
+          subjectTitle?.includes("تحفيظ القرآن")
+        ) {
+          return (
+            teacher.subjects?.includes(subjectTitle) ||
+            teacher.subjects?.includes("تحفيظ القرآن")
+          );
+        }
+
+        if (subjectTitle !== "تحفيظ القرآن") {
           const hasEducationLevel =
             teacher.educationLevels?.includes(mappedEducationLevel);
-          const hasSubject = teacher.subjects?.includes(subject.title);
+          const hasSubject = teacher.subjects?.includes(subjectTitle);
+
           return hasEducationLevel && hasSubject;
-        } else {
-          return teacher.subjects?.includes(subject);
         }
       });
 
-      console.log("Filtered teachers:", filteredTeachers);
-      setTeachers(filteredTeachers);
+      const randomizedTeachers = shuffleArray(filteredTeachers);
+      setTeachers(randomizedTeachers);
     } catch (err) {
       console.error("Error fetching teachers:", err);
       setError("حدث خطأ في تحميل المدرسين. يرجى المحاولة مرة أخرى.");
@@ -117,20 +134,13 @@ const TeachersListingScreen = ({ route, navigation }) => {
   const ContactTeacher = (teacher) => {
     let phoneNumber = teacher.whatsapp ? teacher.whatsapp : teacher.phone;
 
-    // Remove all non-digit characters
     phoneNumber = phoneNumber.replace(/\D/g, "");
 
-    // Handle Egyptian numbers:
-    // If starts with 0, replace with +20
     if (phoneNumber.startsWith("0")) {
       phoneNumber = "+20" + phoneNumber.substring(1);
-    }
-    // If starts with 20 but doesn't have +, add +
-    else if (phoneNumber.startsWith("20") && !phoneNumber.startsWith("+20")) {
+    } else if (phoneNumber.startsWith("20") && !phoneNumber.startsWith("+20")) {
       phoneNumber = "+" + phoneNumber;
-    }
-    // If doesn't start with + at all, assume it's Egyptian and add +20
-    else if (!phoneNumber.startsWith("+")) {
+    } else if (!phoneNumber.startsWith("+")) {
       phoneNumber = "+20" + phoneNumber;
     }
 
@@ -411,9 +421,9 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   teacherHeader: {
-    flexDirection: "row-reverse", // RTL layout
-    alignItems: "flex-start",
-    justifyContent: "space-between",
+    flexDirection: "column", // RTL layout
+    alignItems: "center",
+    justifyContent: "center",
     gap: 20,
     marginBottom: theme.spacing.md || 16,
   },
@@ -447,18 +457,19 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamily?.bold || "System",
     color: theme.colors.text?.primary || "#1A1A1A",
     marginBottom: theme.spacing.xs || 4,
-    textAlign: "right",
+    textAlign: "center",
     writingDirection: "rtl",
     lineHeight: 24,
+    margin: "auto",
+    numberOfLines: 0,
   },
   teacherBio: {
     fontSize: theme.typography.fontSize?.sm || 14,
     fontFamily: theme.typography.fontFamily?.regular || "System",
     color: theme.colors.text?.secondary || "#666666",
-    textAlign: "right",
+    textAlign: "center",
     writingDirection: "rtl",
     lineHeight: 20,
-    width: width - 80 * 2,
   },
   teacherDetails: {
     marginBottom: theme.spacing.lg || 20,

@@ -41,8 +41,6 @@ const HomeScreen = () => {
   ];
 
   const handleEducationLevelPress = (level) => {
-    console.log(level.id);
-
     navigation.navigate("EducationLevel", { educationLevel: level });
   };
 
